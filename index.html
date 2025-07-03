@@ -1,0 +1,751 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modelagem Conceitual de Banco de Dados</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+            animation: fadeInDown 1s ease-out;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+
+        .nav-tabs {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 30px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 50px;
+            padding: 5px;
+            backdrop-filter: blur(10px);
+        }
+
+        .nav-tab {
+            padding: 12px 25px;
+            margin: 0 5px;
+            background: transparent;
+            border: none;
+            color: white;
+            cursor: pointer;
+            border-radius: 25px;
+            transition: all 0.3s ease;
+            font-size: 1rem;
+        }
+
+        .nav-tab:hover {
+            background: rgba(255,255,255,0.2);
+            transform: translateY(-2px);
+        }
+
+        .nav-tab.active {
+            background: rgba(255,255,255,0.3);
+            transform: scale(1.05);
+        }
+
+        .content-section {
+            background: rgba(255,255,255,0.95);
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            backdrop-filter: blur(10px);
+            display: none;
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        .content-section.active {
+            display: block;
+        }
+
+        .concept-card {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 15px;
+            margin: 20px 0;
+            transform: perspective(1000px) rotateY(0deg);
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .concept-card:hover {
+            transform: perspective(1000px) rotateY(5deg) translateZ(10px);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.3);
+        }
+
+        .concept-card h3 {
+            font-size: 1.5rem;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+        }
+
+        .concept-card .icon {
+            font-size: 2rem;
+            margin-right: 15px;
+        }
+
+        .example-box {
+            background: #e3f2fd;
+            border-left: 5px solid #2196f3;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .example-box:hover {
+            transform: translateX(10px);
+            box-shadow: 0 5px 20px rgba(33,150,243,0.3);
+        }
+
+        .quiz-container {
+            background: #fff3e0;
+            border-radius: 15px;
+            padding: 25px;
+            margin: 20px 0;
+            border: 2px solid #ff9800;
+        }
+
+        .quiz-question {
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin-bottom: 20px;
+            color: #e65100;
+        }
+
+        .quiz-options {
+            display: grid;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .quiz-option {
+            padding: 15px;
+            background: white;
+            border: 2px solid #ffcc02;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+
+        .quiz-option:hover {
+            background: #fff8e1;
+            transform: scale(1.02);
+            border-color: #ff9800;
+        }
+
+        .quiz-option.selected {
+            background: #ffcc02;
+            color: #e65100;
+            font-weight: bold;
+        }
+
+        .quiz-option.correct {
+            background: #4caf50;
+            color: white;
+            border-color: #4caf50;
+        }
+
+        .quiz-option.incorrect {
+            background: #f44336;
+            color: white;
+            border-color: #f44336;
+        }
+
+        .quiz-btn {
+            background: linear-gradient(135deg, #ff9800 0%, #f57c00 100%);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            margin-right: 10px;
+        }
+
+        .quiz-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255,152,0,0.4);
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 10px;
+            background: #e0e0e0;
+            border-radius: 5px;
+            overflow: hidden;
+            margin: 20px 0;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(135deg, #4caf50 0%, #8bc34a 100%);
+            width: 0%;
+            transition: width 0.5s ease;
+        }
+
+        .diagram-container {
+            background: #f5f5f5;
+            border-radius: 15px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: center;
+            min-height: 300px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .entity {
+            display: inline-block;
+            background: #2196f3;
+            color: white;
+            padding: 15px 25px;
+            border-radius: 10px;
+            margin: 10px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .entity:hover {
+            transform: scale(1.1);
+            box-shadow: 0 5px 20px rgba(33,150,243,0.5);
+        }
+
+        .relationship {
+            display: inline-block;
+            background: #ff9800;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 50px;
+            margin: 10px;
+            font-style: italic;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .relationship:hover {
+            transform: rotate(5deg) scale(1.1);
+            box-shadow: 0 5px 20px rgba(255,152,0,0.5);
+        }
+
+        .attribute {
+            background: #4caf50;
+            color: white;
+            padding: 8px 15px;
+            border-radius: 20px;
+            margin: 5px;
+            font-size: 0.9rem;
+            display: inline-block;
+            transition: all 0.3s ease;
+        }
+
+        .attribute:hover {
+            background: #66bb6a;
+            transform: translateY(-2px);
+        }
+
+        .score-display {
+            text-align: center;
+            font-size: 1.5rem;
+            color: #4caf50;
+            font-weight: bold;
+            margin: 20px 0;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes fadeInDown {
+            from { opacity: 0; transform: translateY(-30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        .interactive-element {
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .interactive-element:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .feedback {
+            padding: 15px;
+            border-radius: 10px;
+            margin: 15px 0;
+            font-weight: bold;
+            text-align: center;
+            animation: slideIn 0.5s ease-out;
+        }
+
+        .feedback.success {
+            background: #e8f5e8;
+            color: #2e7d32;
+            border: 2px solid #4caf50;
+        }
+
+        .feedback.error {
+            background: #fde8e8;
+            color: #c62828;
+            border: 2px solid #f44336;
+        }
+
+        @keyframes slideIn {
+            from { transform: translateX(-100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        @media (max-width: 768px) {
+            .nav-tabs {
+                flex-direction: column;
+                border-radius: 15px;
+            }
+            
+            .nav-tab {
+                margin: 2px 0;
+                border-radius: 10px;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .concept-card {
+                margin: 15px 0;
+                padding: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🗄️ Modelagem Conceitual de Banco de Dados</h1>
+            <p>Aprenda os fundamentos de forma interativa e divertida!</p>
+        </div>
+
+        <div class="nav-tabs">
+            <button class="nav-tab active" onclick="showSection('conceitos')">📚 Conceitos</button>
+            <button class="nav-tab" onclick="showSection('exemplos')">💡 Exemplos</button>
+            <button class="nav-tab" onclick="showSection('diagrama')">🎯 Diagrama</button>
+            <button class="nav-tab" onclick="showSection('quiz')">🎮 Quiz</button>
+        </div>
+
+        <div id="conceitos" class="content-section active">
+            <h2>📚 Conceitos Fundamentais</h2>
+            
+            <div class="concept-card interactive-element" onclick="toggleDetails('entidade-details')">
+                <h3><span class="icon">📦</span>Entidade</h3>
+                <p>Uma entidade representa um objeto do mundo real que pode ser identificado de forma única.</p>
+                <div id="entidade-details" class="hidden" style="margin-top: 15px; padding-top: 15px; border-top: 1px solid rgba(255,255,255,0.3);">
+                    <p><strong>Características:</strong></p>
+                    <ul style="margin-left: 20px; margin-top: 10px;">
+                        <li>Deve ter existência própria</li>
+                        <li>Deve poder ser identificada unicamente</li>
+                        <li>Deve ter atributos que a descrevem</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="concept-card interactive-element" onclick="toggleDetails('atributo-details')">
+                <h3><span class="icon">🏷️</span>Atributo</h3>
+                <p>Características ou propriedades que descrevem uma entidade.</p>
+                <div id="atributo-details" class="hidden" style="margin-top: 15px; padding-top: 15px; border-top: 1px solid rgba(255,255,255,0.3);">
+                    <p><strong>Tipos de Atributos:</strong></p>
+                    <ul style="margin-left: 20px; margin-top: 10px;">
+                        <li><strong>Simples:</strong> Não podem ser divididos (ex: nome)</li>
+                        <li><strong>Compostos:</strong> Podem ser divididos (ex: endereço)</li>
+                        <li><strong>Chave:</strong> Identifica unicamente a entidade</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="concept-card interactive-element" onclick="toggleDetails('relacionamento-details')">
+                <h3><span class="icon">🔗</span>Relacionamento</h3>
+                <p>Associações entre duas ou mais entidades.</p>
+                <div id="relacionamento-details" class="hidden" style="margin-top: 15px; padding-top: 15px; border-top: 1px solid rgba(255,255,255,0.3);">
+                    <p><strong>Tipos de Cardinalidade:</strong></p>
+                    <ul style="margin-left: 20px; margin-top: 10px;">
+                        <li><strong>1:1</strong> - Um para um</li>
+                        <li><strong>1:N</strong> - Um para muitos</li>
+                        <li><strong>N:N</strong> - Muitos para muitos</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div id="exemplos" class="content-section">
+            <h2>💡 Exemplos Práticos</h2>
+            
+            <div class="example-box">
+                <h3>🏫 Sistema Escolar</h3>
+                <p><strong>Entidades:</strong> Aluno, Professor, Disciplina</p>
+                <p><strong>Atributos do Aluno:</strong> matrícula, nome, idade, série</p>
+                <p><strong>Relacionamentos:</strong></p>
+                <ul>
+                    <li>Aluno <em>estuda</em> Disciplina (N:N)</li>
+                    <li>Professor <em>leciona</em> Disciplina (1:N)</li>
+                </ul>
+            </div>
+
+            <div class="example-box">
+                <h3>🏪 Sistema de Loja</h3>
+                <p><strong>Entidades:</strong> Cliente, Produto, Pedido</p>
+                <p><strong>Atributos do Cliente:</strong> cpf, nome, telefone, email</p>
+                <p><strong>Relacionamentos:</strong></p>
+                <ul>
+                    <li>Cliente <em>faz</em> Pedido (1:N)</li>
+                    <li>Pedido <em>contém</em> Produto (N:N)</li>
+                </ul>
+            </div>
+
+            <div class="example-box">
+                <h3>📚 Sistema de Biblioteca</h3>
+                <p><strong>Entidades:</strong> Usuário, Livro, Empréstimo</p>
+                <p><strong>Atributos do Livro:</strong> isbn, título, autor, ano</p>
+                <p><strong>Relacionamentos:</strong></p>
+                <ul>
+                    <li>Usuário <em>realiza</em> Empréstimo (1:N)</li>
+                    <li>Empréstimo <em>inclui</em> Livro (N:N)</li>
+                </ul>
+            </div>
+        </div>
+
+        <div id="diagrama" class="content-section">
+            <h2>🎯 Diagrama Interativo</h2>
+            <p>Clique nos elementos para ver suas definições:</p>
+            
+            <div class="diagram-container">
+                <div class="entity" onclick="showDefinition('entidade')">ALUNO</div>
+                <div class="relationship" onclick="showDefinition('relacionamento')">estuda</div>
+                <div class="entity" onclick="showDefinition('entidade')">DISCIPLINA</div>
+                
+                <div style="margin-top: 30px;">
+                    <h4>Atributos do ALUNO:</h4>
+                    <div class="attribute" onclick="showDefinition('chave')">matrícula (PK)</div>
+                    <div class="attribute" onclick="showDefinition('atributo')">nome</div>
+                    <div class="attribute" onclick="showDefinition('atributo')">idade</div>
+                    <div class="attribute" onclick="showDefinition('atributo')">série</div>
+                </div>
+                
+                <div style="margin-top: 20px;">
+                    <h4>Atributos da DISCIPLINA:</h4>
+                    <div class="attribute" onclick="showDefinition('chave')">código (PK)</div>
+                    <div class="attribute" onclick="showDefinition('atributo')">nome</div>
+                    <div class="attribute" onclick="showDefinition('atributo')">carga_horária</div>
+                </div>
+            </div>
+            
+            <div id="definition-display" style="margin-top: 20px; padding: 15px; background: #e8f5e8; border-radius: 10px; display: none;">
+                <h4 id="definition-title"></h4>
+                <p id="definition-text"></p>
+            </div>
+        </div>
+
+        <div id="quiz" class="content-section">
+            <h2>🎮 Quiz Interativo</h2>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progress"></div>
+            </div>
+            
+            <div class="quiz-container">
+                <div class="quiz-question" id="question"></div>
+                <div class="quiz-options" id="options"></div>
+                <button class="quiz-btn" onclick="checkAnswer()" id="check-btn">Verificar Resposta</button>
+                <button class="quiz-btn" onclick="nextQuestion()" id="next-btn" style="display: none;">Próxima Pergunta</button>
+                <div id="feedback"></div>
+            </div>
+            
+            <div class="score-display" id="score" style="display: none;"></div>
+        </div>
+    </div>
+
+    <script>
+        // Variáveis globais
+        let currentQuestion = 0;
+        let score = 0;
+        let selectedOption = null;
+        let quizFinished = false;
+
+        // Perguntas do quiz
+        const questions = [
+            {
+                question: "O que é uma entidade em modelagem de banco de dados?",
+                options: [
+                    "Uma característica de um objeto",
+                    "Um objeto do mundo real que pode ser identificado",
+                    "Uma conexão entre objetos",
+                    "Um tipo de dados"
+                ],
+                correct: 1,
+                explanation: "Uma entidade representa um objeto do mundo real que tem existência própria e pode ser identificado de forma única."
+            },
+            {
+                question: "Qual é a cardinalidade de um relacionamento onde um aluno pode estudar várias disciplinas e uma disciplina pode ter vários alunos?",
+                options: [
+                    "1:1 (Um para um)",
+                    "1:N (Um para muitos)",
+                    "N:N (Muitos para muitos)",
+                    "N:1 (Muitos para um)"
+                ],
+                correct: 2,
+                explanation: "N:N significa que cada aluno pode estar relacionado com várias disciplinas e cada disciplina pode estar relacionada com vários alunos."
+            },
+            {
+                question: "O que é um atributo chave (Primary Key)?",
+                options: [
+                    "Um atributo que pode ser nulo",
+                    "Um atributo que identifica unicamente uma entidade",
+                    "Um atributo que conecta entidades",
+                    "Um atributo opcional"
+                ],
+                correct: 1,
+                explanation: "Um atributo chave (PK) é usado para identificar de forma única cada registro em uma entidade."
+            },
+            {
+                question: "Em um sistema de biblioteca, qual seria um exemplo de relacionamento 1:N?",
+                options: [
+                    "Livro - Autor",
+                    "Usuário - Empréstimo",
+                    "Livro - Categoria",
+                    "Empréstimo - Livro"
+                ],
+                correct: 1,
+                explanation: "Um usuário pode realizar vários empréstimos (1:N), mas cada empréstimo pertence a apenas um usuário."
+            },
+            {
+                question: "Qual das seguintes opções NÃO é uma característica de uma entidade?",
+                options: [
+                    "Deve ter existência própria",
+                    "Deve poder ser identificada unicamente",
+                    "Deve conectar outras entidades",
+                    "Deve ter atributos que a descrevem"
+                ],
+                correct: 2,
+                explanation: "Conectar outras entidades é função dos relacionamentos, não das entidades."
+            }
+        ];
+
+        // Definições para o diagrama
+        const definitions = {
+            entidade: {
+                title: "Entidade",
+                text: "Representa um objeto do mundo real com existência própria. No exemplo, ALUNO e DISCIPLINA são entidades."
+            },
+            relacionamento: {
+                title: "Relacionamento",
+                text: "Mostra como as entidades se conectam. 'estuda' é um relacionamento que conecta ALUNO e DISCIPLINA."
+            },
+            atributo: {
+                title: "Atributo",
+                text: "Características que descrevem uma entidade. Por exemplo, nome e idade são atributos do ALUNO."
+            },
+            chave: {
+                title: "Chave Primária (PK)",
+                text: "Atributo que identifica unicamente cada registro da entidade. Matrícula identifica cada aluno."
+            }
+        };
+
+        // Funções principais
+        function showSection(sectionId) {
+            // Esconder todas as seções
+            document.querySelectorAll('.content-section').forEach(section => {
+                section.classList.remove('active');
+            });
+            
+            // Remover classe active de todos os tabs
+            document.querySelectorAll('.nav-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Mostrar seção selecionada
+            document.getElementById(sectionId).classList.add('active');
+            
+            // Ativar tab correspondente
+            event.target.classList.add('active');
+        }
+
+        function toggleDetails(elementId) {
+            const element = document.getElementById(elementId);
+            element.classList.toggle('hidden');
+        }
+
+        function showDefinition(type) {
+            const definition = definitions[type];
+            document.getElementById('definition-title').textContent = definition.title;
+            document.getElementById('definition-text').textContent = definition.text;
+            document.getElementById('definition-display').style.display = 'block';
+        }
+
+        function loadQuestion() {
+            if (currentQuestion >= questions.length) {
+                showFinalScore();
+                return;
+            }
+
+            const question = questions[currentQuestion];
+            document.getElementById('question').textContent = question.question;
+            
+            const optionsContainer = document.getElementById('options');
+            optionsContainer.innerHTML = '';
+            
+            question.options.forEach((option, index) => {
+                const optionElement = document.createElement('div');
+                optionElement.className = 'quiz-option';
+                optionElement.textContent = option;
+                optionElement.onclick = () => selectOption(index);
+                optionsContainer.appendChild(optionElement);
+            });
+            
+            document.getElementById('check-btn').style.display = 'inline-block';
+            document.getElementById('next-btn').style.display = 'none';
+            document.getElementById('feedback').innerHTML = '';
+            selectedOption = null;
+            
+            updateProgress();
+        }
+
+        function selectOption(index) {
+            document.querySelectorAll('.quiz-option').forEach(option => {
+                option.classList.remove('selected');
+            });
+            
+            document.querySelectorAll('.quiz-option')[index].classList.add('selected');
+            selectedOption = index;
+        }
+
+        function checkAnswer() {
+            if (selectedOption === null) {
+                showFeedback('Por favor, selecione uma resposta!', 'error');
+                return;
+            }
+            
+            const question = questions[currentQuestion];
+            const options = document.querySelectorAll('.quiz-option');
+            
+            if (selectedOption === question.correct) {
+                score++;
+                options[selectedOption].classList.add('correct');
+                showFeedback('Correto! ' + question.explanation, 'success');
+            } else {
+                options[selectedOption].classList.add('incorrect');
+                options[question.correct].classList.add('correct');
+                showFeedback('Incorreto. ' + question.explanation, 'error');
+            }
+            
+            document.getElementById('check-btn').style.display = 'none';
+            document.getElementById('next-btn').style.display = 'inline-block';
+        }
+
+        function nextQuestion() {
+            currentQuestion++;
+            loadQuestion();
+        }
+
+        function showFeedback(message, type) {
+            const feedback = document.getElementById('feedback');
+            feedback.innerHTML = `<div class="feedback ${type}">${message}</div>`;
+        }
+
+        function updateProgress() {
+            const progress = ((currentQuestion + 1) / questions.length) * 100;
+            document.getElementById('progress').style.width = progress + '%';
+        }
+
+        function showFinalScore() {
+            const percentage = Math.round((score / questions.length) * 100);
+            const scoreElement = document.getElementById('score');
+            
+            let message = `Parabéns! Você acertou ${score} de ${questions.length} perguntas (${percentage}%)`;
+            
+            if (percentage >= 80) {
+                message += " - Excelente! 🎉";
+            } else if (percentage >= 60) {
+                message += " - Bom trabalho! 👍";
+            } else {
+                message += " - Continue estudando! 📚";
+            }
+            
+            scoreElement.textContent = message;
+            scoreElement.style.display = 'block';
+            
+            document.querySelector('.quiz-container').style.display = 'none';
+            
+            // Botão para reiniciar
+            const restartBtn = document.createElement('button');
+            restartBtn.className = 'quiz-btn';
+            restartBtn.textContent = 'Reiniciar Quiz';
+            restartBtn.onclick = restartQuiz;
+            scoreElement.appendChild(restartBtn);
+        }
+
+        function restartQuiz() {
+            currentQuestion = 0;
+            score = 0;
+            selectedOption = null;
+            quizFinished = false;
+            
+            document.querySelector('.quiz-container').style.display = 'block';
+            document.getElementById('score').style.display = 'none';
+            
+            loadQuestion();
+        }
+
+        // Inicializar o quiz quando a página carregar
+        document.addEventListener('DOMContentLoaded', function() {
+            loadQuestion();
+        });
+    </script>
+</body>
+</html>
